@@ -58,3 +58,22 @@ JSON endpoints are under `/api/courses`, `/api/sessions`, `/api/bookings`. Mutat
 - **Organisers** manage courses and class sessions, view class rosters, promote/demote organisers, and remove users.
 
 Set a strong `JWT_SECRET` in production and deploy over **HTTPS** so the auth cookie can use the `Secure` flag.
+
+## Deploy on Render
+
+This app is a **Node Web Service** (long-lived `npm start`), not a static export.
+
+1. In [Render](https://render.com), create a **Web Service** from this Git repository.
+2. **Build command:** `npm install` (default is fine).
+3. **Start command:** `npm start` (runs `node index.js`; listens on `PORT` and `0.0.0.0`).
+4. **Health check path:** `/health`.
+5. In **Environment**, set at least:
+   - `JWT_SECRET` — long random string (16+ characters).
+   - `ORGANISER_SIGNUP_CODE` — optional; same role as local `.env`.
+   - `NODE_ENV` — `production` (Render often sets this; cookie `Secure` expects HTTPS).
+
+After the first deploy, open the service **Shell** and run **`npm run seed`** once if you want the README demo accounts on the live database.
+
+**NeDB files** live under `db/` in the service filesystem. On the free tier, data can be lost if the instance is restarted or redeployed without a **persistent disk**. To keep data across deploys: add a **Disk** in Render, mount it (e.g. `/data/nedb`), and set **`NEDB_DATA_DIR=/data/nedb`** in environment variables.
+
+Optional: commit includes **`render.yaml`** so you can use Render’s **Blueprint** flow to create the web service with the same settings.

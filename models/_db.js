@@ -7,11 +7,10 @@ import { promises as fs } from "fs";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Vercel/Lambda: project dir is read-only; only /tmp is writable for NeDB files.
-const dbDir =
-  process.env.VERCEL === "1" || process.env.AWS_LAMBDA_FUNCTION_NAME
-    ? path.join("/tmp", "yoga-nedb")
-    : path.join(__dirname, "../db");
+// Default: repo `db/`. On Render, mount a disk and set NEDB_DATA_DIR to that path for persistence across deploys.
+const dbDir = process.env.NEDB_DATA_DIR
+  ? path.resolve(process.env.NEDB_DATA_DIR)
+  : path.join(__dirname, "../db");
 
 export const usersDb = Datastore.create({
   filename: path.join(dbDir, "users.db"),

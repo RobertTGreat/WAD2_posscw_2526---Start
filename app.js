@@ -1,4 +1,4 @@
-// app.js — Express application (no listen; used by index.js and Vercel api/)
+// app.js — Express application (no listen; started from index.js on Render/local)
 import express from "express";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
@@ -14,53 +14,35 @@ import authRoutes from "./routes/auth.js";
 import organiserRoutes from "./routes/organiser.js";
 import { loadAuthUser } from "./middleware/auth.js";
 import { attachFormCsrf } from "./middleware/csrfForm.js";
-import { initDb } from "./models/_db.js";
 
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Vercel bundles code under the function output dir; views are copied to cwd (see vercel.json includeFiles).
-const appRoot =
-  process.env.VERCEL === "1"
-    ? process.cwd()
-    : __dirname;
-
 export const app = express();
 
-if (process.env.VERCEL === "1") {
+if (process.env.RENDER === "true" || process.env.NODE_ENV === "production") {
   app.set("trust proxy", 1);
 }
 
 app.engine(
   "mustache",
-  mustacheExpress(path.join(appRoot, "views", "partials"), ".mustache")
+  mustacheExpress(path.join(__dirname, "views", "partials"), ".mustache")
 );
 app.set("view engine", "mustache");
-app.set("views", path.join(appRoot, "views"));
+app.set("views", path.join(__dirname, "views"));
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cookieParser());
-
-let serverlessDbReady;
-if (process.env.VERCEL === "1") {
-  app.use((req, res, next) => {
-    if (!serverlessDbReady) serverlessDbReady = initDb();
-    serverlessDbReady.then(() => next()).catch(next);
-  });
-}
 
 app.use((req, res, next) => {
   res.locals.year = new Date().getFullYear();
   next();
 });
 
-// Local: serve /static from public/. On Vercel, files under public/ are on the CDN (see public/static/).
-if (process.env.VERCEL !== "1") {
-  app.use("/static", express.static(path.join(appRoot, "public")));
-}
+app.use("/static", express.static(path.join(__dirname, "public")));
 
 app.use(loadAuthUser);
 app.use(attachFormCsrf);

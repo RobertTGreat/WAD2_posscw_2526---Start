@@ -1,0 +1,22 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+# Connect the repo in the Render dashboard and use "Apply blueprint", or create a Web Service manually with the same settings.
+
+services:
+  - type: web
+    name: stillpoint-yoga
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        sync: false
+      - key: ORGANISER_SIGNUP_CODE
+        sync: false
+      # Optional: mount a persistent disk at this path in the dashboard, then set:
+      # - key: NEDB_DATA_DIR
+      #   value: /data/nedb
