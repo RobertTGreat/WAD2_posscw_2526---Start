@@ -61,19 +61,30 @@ Set a strong `JWT_SECRET` in production and deploy over **HTTPS** so the auth co
 
 ## Deploy on Render
 
-This app is a **Node Web Service** (long-lived `npm start`), not a static export.
+This app is a **Node Web Service** (Express listens on `PORT`), **not** a **Static Site**. If you pick **Static Site**, the logs will show *“Empty build command; skipping build”* and the site will return **404** for every path, because no Node process ever runs.
 
-1. In [Render](https://render.com), create a **Web Service** from this Git repository.
-2. **Build command:** `npm install` (default is fine).
-3. **Start command:** `npm start` (runs `node index.js`; listens on `PORT` and `0.0.0.0`).
-4. **Health check path:** `/health`.
-5. In **Environment**, set at least:
-   - `JWT_SECRET` — long random string (16+ characters).
-   - `ORGANISER_SIGNUP_CODE` — optional; same role as local `.env`.
-   - `NODE_ENV` — `production` (Render often sets this; cookie `Secure` expects HTTPS).
+### Create the right service
 
-After the first deploy, open the service **Shell** and run **`npm run seed`** once if you want the README demo accounts on the live database.
+1. Dashboard → **New +** → **Web Service** (not “Static Site”).
+2. Connect this GitHub repo and branch `main`.
+3. Use these settings (override auto-detect if needed):
+   - **Runtime:** Node
+   - **Build command:** `npm install` (or `npm run build` — both install dependencies)
+   - **Start command:** `npm start`
+4. **Health check path:** `/health`
+5. **Environment** variables (at minimum):
+   - `JWT_SECRET` — long random string (16+ characters)
+   - `ORGANISER_SIGNUP_CODE` — optional; same idea as local `.env`
+   - `NODE_ENV` — `production` (often set automatically)
 
-**NeDB files** live under `db/` in the service filesystem. On the free tier, data can be lost if the instance is restarted or redeployed without a **persistent disk**. To keep data across deploys: add a **Disk** in Render, mount it (e.g. `/data/nedb`), and set **`NEDB_DATA_DIR=/data/nedb`** in environment variables.
+After the first successful deploy, use the service **Shell** and run **`npm run seed`** once if you want the README demo accounts on the live database.
 
-Optional: commit includes **`render.yaml`** so you can use Render’s **Blueprint** flow to create the web service with the same settings.
+**NeDB files** live under `db/` on the instance. On the free tier, data can be lost on restart unless you add a **persistent disk**, mount it (e.g. `/data/nedb`), and set **`NEDB_DATA_DIR=/data/nedb`**.
+
+### Blueprint (optional)
+
+The repo includes **`render.yaml`**. In Render you can use **Blueprints** / **Apply blueprint** so the service is created as a **web** Node service with the correct build and start commands.
+
+### If you already created a Static Site by mistake
+
+Delete that **Static Site** in the dashboard and create a new **Web Service** with the commands above. There is no “publish directory” for this app; do not use Static Site settings for it.
