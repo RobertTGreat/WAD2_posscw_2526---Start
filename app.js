@@ -21,6 +21,12 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Vercel bundles code under the function output dir; views are copied to cwd (see vercel.json includeFiles).
+const appRoot =
+  process.env.VERCEL === "1"
+    ? process.cwd()
+    : __dirname;
+
 export const app = express();
 
 if (process.env.VERCEL === "1") {
@@ -29,10 +35,10 @@ if (process.env.VERCEL === "1") {
 
 app.engine(
   "mustache",
-  mustacheExpress(path.join(__dirname, "views", "partials"), ".mustache")
+  mustacheExpress(path.join(appRoot, "views", "partials"), ".mustache")
 );
 app.set("view engine", "mustache");
-app.set("views", path.join(__dirname, "views"));
+app.set("views", path.join(appRoot, "views"));
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -51,7 +57,10 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use("/static", express.static(path.join(__dirname, "public")));
+// Local: serve /static from public/. On Vercel, files under public/ are on the CDN (see public/static/).
+if (process.env.VERCEL !== "1") {
+  app.use("/static", express.static(path.join(appRoot, "public")));
+}
 
 app.use(loadAuthUser);
 app.use(attachFormCsrf);

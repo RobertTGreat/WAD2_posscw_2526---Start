@@ -1,10 +1,14 @@
 // services/authService.js — bcrypt password hashing + signed session JWT (not encryption of passwords at rest beyond hashing)
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
+import { promisify } from "node:util";
 import jwt from "jsonwebtoken";
 import Tokens from "csrf";
 
 const tokens = new Tokens();
 const SALT_ROUNDS = 12;
+
+const hashAsync = promisify(bcrypt.hash);
+const compareAsync = promisify(bcrypt.compare);
 const JWT_EXPIRY = "7d";
 
 function getJwtSecret() {
@@ -31,12 +35,12 @@ export function verifyCsrfToken(csrfSecret, token) {
 }
 
 export async function hashPassword(plain) {
-  return bcrypt.hash(plain, SALT_ROUNDS);
+  return hashAsync(plain, SALT_ROUNDS);
 }
 
 export async function verifyPassword(plain, passwordHash) {
   if (!passwordHash) return false;
-  return bcrypt.compare(plain, passwordHash);
+  return compareAsync(plain, passwordHash);
 }
 
 /** bcrypt only hashes the first 72 bytes — reject longer passwords at sign-up so login matches. */
