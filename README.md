@@ -61,7 +61,7 @@ Set a strong `JWT_SECRET` in production and deploy over **HTTPS** so the auth co
 
 ## Deploy
 
-This repo supports both **Render** and **Vercel** while keeping **NeDB** as the only datastore.
+This repo supports **Vercel** while keeping **NeDB** as the only datastore.
 
 ### Shared environment variables
 
@@ -70,27 +70,6 @@ Set these in whichever platform you deploy to:
 - `JWT_SECRET` — long random string (16+ characters minimum)
 - `ORGANISER_SIGNUP_CODE` — optional; same idea as local `.env`
 - `NODE_ENV=production`
-
-### Deploy on Render
-
-Use a **Web Service**, not a **Static Site**.
-
-1. Dashboard → **New +** → **Web Service**
-2. Connect this repository and branch `main`
-3. Use:
-   - **Build command:** `npm install`
-   - **Start command:** `npm start`
-   - **Health check path:** `/health`
-
-If you create a **Static Site** instead, Render will show **“Empty build command; skipping build”** and your app will return **404** because Express never starts.
-
-After the first successful deploy, open the Render shell and run **`npm run seed`** once if you want the demo users and demo courses.
-
-For persistent NeDB data on Render, add a **Disk**, mount it (for example `/data/nedb`), and set:
-
-- `NEDB_DATA_DIR=/data/nedb`
-
-The repo also includes **`render.yaml`** if you prefer Render Blueprints.
 
 ### Deploy on Vercel
 
