@@ -59,32 +59,51 @@ JSON endpoints are under `/api/courses`, `/api/sessions`, `/api/bookings`. Mutat
 
 Set a strong `JWT_SECRET` in production and deploy over **HTTPS** so the auth cookie can use the `Secure` flag.
 
-## Deploy on Render
+## Deploy
 
-This app is a **Node Web Service** (Express listens on `PORT`), **not** a **Static Site**. If you pick **Static Site**, the logs will show *“Empty build command; skipping build”* and the site will return **404** for every path, because no Node process ever runs.
+This repo supports both **Render** and **Vercel** while keeping **NeDB** as the only datastore.
 
-### Create the right service
+### Shared environment variables
 
-1. Dashboard → **New +** → **Web Service** (not “Static Site”).
-2. Connect this GitHub repo and branch `main`.
-3. Use these settings (override auto-detect if needed):
-   - **Runtime:** Node
-   - **Build command:** `npm install` (or `npm run build` — both install dependencies)
+Set these in whichever platform you deploy to:
+
+- `JWT_SECRET` — long random string (16+ characters minimum)
+- `ORGANISER_SIGNUP_CODE` — optional; same idea as local `.env`
+- `NODE_ENV=production`
+
+### Deploy on Render
+
+Use a **Web Service**, not a **Static Site**.
+
+1. Dashboard → **New +** → **Web Service**
+2. Connect this repository and branch `main`
+3. Use:
+   - **Build command:** `npm install`
    - **Start command:** `npm start`
-4. **Health check path:** `/health`
-5. **Environment** variables (at minimum):
-   - `JWT_SECRET` — long random string (16+ characters)
-   - `ORGANISER_SIGNUP_CODE` — optional; same idea as local `.env`
-   - `NODE_ENV` — `production` (often set automatically)
+   - **Health check path:** `/health`
 
-After the first successful deploy, use the service **Shell** and run **`npm run seed`** once if you want the README demo accounts on the live database.
+If you create a **Static Site** instead, Render will show **“Empty build command; skipping build”** and your app will return **404** because Express never starts.
 
-**NeDB files** live under `db/` on the instance. On the free tier, data can be lost on restart unless you add a **persistent disk**, mount it (e.g. `/data/nedb`), and set **`NEDB_DATA_DIR=/data/nedb`**.
+After the first successful deploy, open the Render shell and run **`npm run seed`** once if you want the demo users and demo courses.
 
-### Blueprint (optional)
+For persistent NeDB data on Render, add a **Disk**, mount it (for example `/data/nedb`), and set:
 
-The repo includes **`render.yaml`**. In Render you can use **Blueprints** / **Apply blueprint** so the service is created as a **web** Node service with the correct build and start commands.
+- `NEDB_DATA_DIR=/data/nedb`
 
-### If you already created a Static Site by mistake
+The repo also includes **`render.yaml`** if you prefer Render Blueprints.
 
-Delete that **Static Site** in the dashboard and create a new **Web Service** with the commands above. There is no “publish directory” for this app; do not use Static Site settings for it.
+### Deploy on Vercel
+
+Import the repository as a normal project. No publish directory is needed.
+
+- Vercel uses the root **`index.js`** Express entry
+- Static files are served from **`public/`**
+- Mustache templates are bundled via **`vercel.json`**
+
+Important NeDB note for Vercel:
+
+- Vercel has no persistent writable project disk
+- This app stores NeDB files in **`/tmp/yoga-nedb`** on Vercel
+- That storage is **ephemeral**, so data can disappear between cold starts / fresh instances
+
+To keep the Vercel demo usable, the app automatically seeds the demo data on a brand-new empty serverless instance. That gives you the demo courses and logins again when a new instance starts, but it is still **not durable storage**.

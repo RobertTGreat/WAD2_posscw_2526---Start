@@ -6,9 +6,9 @@
         "node": ">=20"
     },
     "scripts": {
-        "build": "npm install",
-        "start": "node index.js",
-        "dev": "nodemon index.js",
+        "build": "node -e \"console.log('No build step required')\"",
+        "start": "node start.js",
+        "dev": "nodemon start.js",
         "seed": "node seed/seed.js",
         "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand"
     },

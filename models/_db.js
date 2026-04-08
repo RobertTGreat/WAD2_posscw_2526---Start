@@ -3,14 +3,24 @@ import Datastore from "nedb-promises";
 import path from "path";
 import { fileURLToPath } from "url";
 import { promises as fs } from "fs";
+import { isVercelRuntime } from "../utils/runtime.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Default: repo `db/`. On Render, mount a disk and set NEDB_DATA_DIR to that path for persistence across deploys.
-const dbDir = process.env.NEDB_DATA_DIR
-  ? path.resolve(process.env.NEDB_DATA_DIR)
-  : path.join(__dirname, "../db");
+function resolveDbDirectory() {
+  if (process.env.NEDB_DATA_DIR) {
+    return path.resolve(process.env.NEDB_DATA_DIR);
+  }
+
+  if (isVercelRuntime()) {
+    return path.join("/tmp", "yoga-nedb");
+  }
+
+  return path.join(__dirname, "../db");
+}
+
+const dbDir = resolveDbDirectory();
 
 export const usersDb = Datastore.create({
   filename: path.join(dbDir, "users.db"),
