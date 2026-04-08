@@ -9,6 +9,7 @@ import {
 import { UserModel } from "../models/userModel.js";
 import { CourseModel } from "../models/courseModel.js";
 import { SessionModel } from "../models/sessionModel.js";
+import { hashPassword } from "../services/authService.js";
 
 export async function resetDb() {
   await initDb();
@@ -19,24 +20,25 @@ export async function resetDb() {
     bookingsDb.remove({}, { multi: true }),
   ]);
   await Promise.all([
-    usersDb.persistence.compactDatafile(),
-    coursesDb.persistence.compactDatafile(),
-    sessionsDb.persistence.compactDatafile(),
-    bookingsDb.persistence.compactDatafile(),
+    usersDb.compactDatafile(),
+    coursesDb.compactDatafile(),
+    sessionsDb.compactDatafile(),
+    bookingsDb.compactDatafile(),
   ]);
 }
 
-// Seed a minimal dataset used by multiple tests
 export async function seedMinimal() {
   const student = await UserModel.create({
     name: "Test Student",
     email: "student@test.local",
+    passwordHash: await hashPassword("TestStudent123"),
     role: "student",
   });
-  const instructor = await UserModel.create({
-    name: "Test Instructor",
-    email: "instructor@test.local",
-    role: "instructor",
+  const organiser = await UserModel.create({
+    name: "Test Organiser",
+    email: "organiser@test.local",
+    passwordHash: await hashPassword("TestOrganiser123"),
+    role: "organiser",
   });
 
   const course = await CourseModel.create({
@@ -46,18 +48,21 @@ export async function seedMinimal() {
     allowDropIn: true,
     startDate: "2026-02-02",
     endDate: "2026-04-20",
-    instructorId: instructor._id,
+    instructorName: "Test Instructor",
+    location: "Studio A",
+    defaultPriceGbp: 15,
     sessionIds: [],
     description: "A test course for E2E route testing.",
   });
 
-  // Two sessions to keep tests fast
   const s1 = await SessionModel.create({
     courseId: course._id,
     startDateTime: new Date("2026-02-02T18:30:00").toISOString(),
     endDateTime: new Date("2026-02-02T19:45:00").toISOString(),
     capacity: 18,
     bookedCount: 0,
+    location: "Studio A",
+    priceGbp: 15,
   });
 
   const s2 = await SessionModel.create({
@@ -66,9 +71,16 @@ export async function seedMinimal() {
     endDateTime: new Date("2026-02-09T19:45:00").toISOString(),
     capacity: 18,
     bookedCount: 0,
+    location: "Studio A",
+    priceGbp: 15,
   });
 
   await CourseModel.update(course._id, { sessionIds: [s1._id, s2._id] });
 
-  return { student, instructor, course, sessions: [s1, s2] };
+  return { student, organiser, course, sessions: [s1, s2] };
+}
+
+/** Log in via form POST and return supertest agent (keeps cookies). */
+export async function loginAgent(agent, email, password, next = "/courses") {
+  await agent.post("/login").type("form").send({ email, password, next });
 }

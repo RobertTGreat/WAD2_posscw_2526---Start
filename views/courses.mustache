@@ -1,46 +1,75 @@
+{{> head}}
+{{> header}}
 
-<select name="level">
-  <option value="" {{^filters.level}}selected{{/filters.level}}>Any</option>
-  <option value="beginner" {{#filters}}{{#level}} {{#isBeginner}}selected{{/isBeginner}} {{/level}}{{/filters}}>Beginner</option>
-</select>
+<section class="section">
+  <h1 class="page-title">Courses</h1>
+  {{#showSignupBanner}}
+  <p class="alert" role="status">You’re signed in with your new account. Browse and book courses below.</p>
+  {{/showSignupBanner}}
+  <p class="lede muted">Filter by level, format, or search by name. Showing upcoming programmes only.</p>
 
- <label>
+  <form class="filter-form" method="get" action="/courses">
+    <label>
+      Level
+      <select name="level">
+        <option value="" {{#filters.anyLevel}}selected{{/filters.anyLevel}}>Any</option>
+        <option value="beginner" {{#filters.levelBeginner}}selected{{/filters.levelBeginner}}>Beginner</option>
+        <option value="intermediate" {{#filters.levelIntermediate}}selected{{/filters.levelIntermediate}}>Intermediate</option>
+        <option value="advanced" {{#filters.levelAdvanced}}selected{{/filters.levelAdvanced}}>Advanced</option>
+      </select>
+    </label>
+    <label>
+      Format
+      <select name="type">
+        <option value="" {{#filters.anyType}}selected{{/filters.anyType}}>Any</option>
+        <option value="WEEKLY_BLOCK" {{#filters.typeWeekly}}selected{{/filters.typeWeekly}}>Weekly block</option>
+        <option value="WEEKEND_WORKSHOP" {{#filters.typeWeekend}}selected{{/filters.typeWeekend}}>Weekend workshop</option>
+      </select>
+    </label>
+    <label>
+      Drop-in
+      <select name="dropin">
+        <option value="" {{#filters.anyDropin}}selected{{/filters.anyDropin}}>Any</option>
+        <option value="yes" {{#filters.dropinYes}}selected{{/filters.dropinYes}}>Allowed</option>
+        <option value="no" {{#filters.dropinNo}}selected{{/filters.dropinNo}}>Not allowed</option>
+      </select>
+    </label>
+    <label class="grow">
       Search
       <input type="search" name="q" value="{{filters.q}}" placeholder="Title or description" />
     </label>
-
-    <button class="btn" type="submit">Apply</button>
-    /coursesReset</a>
+    <button class="btn btn-primary" type="submit">Apply</button>
+    <a class="btn btn-ghost" href="/courses">Reset</a>
   </form>
 </section>
 
 <div class="cards">
   {{#courses}}
   <article class="card">
-    <h2>/courses/{{id}}{{title}}</a></h2>
-    <p class="muted">
-      Level: {{level}} • Type: {{type}} {{#allowDropIn}}• Drop-in OK{{/allowDropIn}}
-    </p>
-    <p>{{description}}</p>
-    <p class="muted">Dates: {{startDate}} – {{endDate}}</p>
-    <p class="muted">Next session: {{nextSession}} • Sessions: {{sessionsCount}}</p>
-    <p>/courses/{{id}}View &amp; Book</a></p>
+    <h2 class="card-title"><a href="/courses/{{id}}">{{title}}</a></h2>
+    <p class="muted small">Level: {{level}} · {{type}} {{#allowDropIn}}· Drop-in OK{{/allowDropIn}}</p>
+    <p class="muted small">{{location}} · {{price}}</p>
+    <p class="card-desc">{{description}}</p>
+    <p class="muted small">Dates: {{startDate}} – {{endDate}}</p>
+    <p class="muted small">Next session: {{nextSession}} · {{sessionsCount}} classes</p>
+    <p class="card-actions"><a class="btn btn-secondary" href="/courses/{{id}}">View &amp; book</a></p>
   </article>
   {{/courses}}
-
   {{^courses}}
-    <p>No courses match your filters.</p>
+  <p class="muted">No courses match your filters.</p>
   {{/courses}}
 </div>
-<!-- 
-<nav class="pagination">
-  {{#pagination.hasPrev}}
-    {{pagination.prevLink}}← Previous</a>
-  {{/pagination.hasPrev}}
 
-  <span class="muted">Page {{pagination.page}} of {{pagination.totalPages}}</span>
+{{#pagination}}
+<nav class="pagination" aria-label="Pagination">
+  {{#hasPrev}}
+  <a class="btn btn-ghost" href="{{prevLink}}">← Previous</a>
+  {{/hasPrev}}
+  <span class="muted">Page {{page}} of {{totalPages}}</span>
+  {{#hasNext}}
+  <a class="btn btn-ghost" href="{{nextLink}}">Next →</a>
+  {{/hasNext}}
+</nav>
+{{/pagination}}
 
-  {{#pagination.hasNext}}
-    {{pagination.nextLink}}Next →</a>
-  {{/pagination.hasNext}}
-</nav> -->
+{{> footer}}

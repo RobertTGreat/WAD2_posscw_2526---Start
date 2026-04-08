@@ -1,51 +1,71 @@
-
 {{> head}}
 {{> header}}
 
-<article>
-  <h1>{{course.title}}</h1>
-  <p class="muted">
-    Level: {{course.level}} • Type: {{course.type}} {{#course.allowDropIn}}• Drop-in available{{/course.allowDropIn}}
-  </p>
-  <p>{{course.description}}</p>
-  <p class="muted">Dates: {{course.startDate}} – {{course.endDate}}</p>
+<article class="section prose">
+  <p class="eyebrow">{{course.type}} · {{course.level}}</p>
+  <h1 class="page-title">{{course.title}}</h1>
+  <p class="muted">Instructor: {{course.instructorName}} · Studio: {{course.location}} · From {{course.defaultPrice}} per class</p>
+  <p class="lede">{{course.description}}</p>
+  <p class="muted">Course dates: {{course.startDate}} – {{course.endDate}}</p>
 
-  <section>
+  {{#canBook}}
+  <section class="stack">
     <h2>Book the full course</h2>
-   <form action="/courses/{{course.id}}/book" method="post">  <!-- If you add CSRF later: <input type="hidden" name="_csrf" value="{{csrfToken}}"> -->
-      <input type="hidden" name="userId" value="{{user._id}}">
-      <button class="btn primary" type="submit">Book full course</button>
+    <p class="muted">Reserves your place for every session in this programme.</p>
+    <form method="post" action="/courses/{{course.id}}/book">
+      <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+      <button class="btn btn-primary" type="submit">Book full course</button>
     </form>
+    <p><a class="btn btn-secondary" href="/courses/{{course.id}}/book">Review booking page</a></p>
   </section>
+  {{/canBook}}
+  {{^canBook}}
+  <p><a class="btn btn-primary" href="{{loginUrl}}">Sign in to book</a></p>
+  {{/canBook}}
 
-  <section>
-    <h2>Sessions</h2>
-    <table class="table">
-      <thead>
-        <tr><th>Start</th><th>End</th><th>Capacity</th><th>Booked</th><th>Remaining</th><th></th></tr>
-      </thead>
-      <tbody>
-        {{#sessions}}
-        <tr>
-          <td>{{start}}</td>
-          <td>{{end}}</td>
-          <td>{{capacity}}</td>
-          <td>{{booked}}</td>
-          <td>{{remaining}}</td>
-          <td>
-            {{#../course.allowDropIn}}
-            <form method="postook
-              <button class="btn" type="submit" {{#isFull}}disabled{{/isFull}}>Book this session</button>
-            </form>
-            {{/../course.allowDropIn}}
-            {{^../course.allowDropIn}}
-              <span class="muted">Drop-ins disabled</span>
-            {{/../course.allowDropIn}}
-          </td>
-        </tr>
-        {{/sessions}}
-      </tbody>
-    </table>
+  <section class="stack">
+    <h2>Classes</h2>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Start</th>
+            <th scope="col">End</th>
+            <th scope="col">Location</th>
+            <th scope="col">Price</th>
+            <th scope="col">Places</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#sessions}}
+          <tr>
+            <td>{{start}}</td>
+            <td>{{end}}</td>
+            <td>{{location}}</td>
+            <td>{{price}}</td>
+            <td>{{remaining}} left</td>
+            <td>
+              {{#../canBook}}
+              {{#showDropIn}}
+              <form method="post" action="/sessions/{{id}}/book" class="inline-form">
+                <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+                <button class="btn btn-secondary" type="submit" {{#isFull}}disabled{{/isFull}}>Book class</button>
+              </form>
+              {{/showDropIn}}
+              {{^showDropIn}}
+              <span class="muted">Block enrolment</span>
+              {{/showDropIn}}
+              {{/../canBook}}
+              {{^../canBook}}
+              <span class="muted">—</span>
+              {{/../canBook}}
+            </td>
+          </tr>
+          {{/sessions}}
+        </tbody>
+      </table>
+    </div>
   </section>
 </article>
 

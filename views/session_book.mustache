@@ -1,0 +1,27 @@
+{{> head}}
+{{> header}}
+
+<article class="section prose">
+  <h1 class="page-title">Book a single class</h1>
+  <p class="muted">{{course.title}}</p>
+  <dl class="kv">
+    <dt>Starts</dt><dd>{{session.start}}</dd>
+    <dt>Ends</dt><dd>{{session.end}}</dd>
+    <dt>Location</dt><dd>{{session.location}}</dd>
+    <dt>Price</dt><dd>{{session.price}}</dd>
+    <dt>Places left</dt><dd>{{session.remaining}}</dd>
+  </dl>
+
+  {{#session.isFull}}
+  <p class="alert">This class is full. You can try another date.</p>
+  {{/session.isFull}}
+  {{^session.isFull}}
+  <form method="post" action="/sessions/{{session.id}}/book" class="stack">
+    <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+    <button class="btn btn-primary" type="submit">Confirm single class</button>
+    <a class="btn btn-ghost" href="/courses/{{course.id}}">Back</a>
+  </form>
+  {{/session.isFull}}
+</article>
+
+{{> footer}}

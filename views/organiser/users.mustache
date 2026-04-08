@@ -1,0 +1,48 @@
+{{> head}}
+{{> header}}
+
+<section class="section">
+  <h1 class="page-title">Users &amp; organisers</h1>
+  <p class="muted">At least one organiser is required ({{organisersCount}} now).</p>
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr><th>Name</th><th>Email</th><th>Role</th><th></th></tr>
+      </thead>
+      <tbody>
+        {{#users}}
+        <tr>
+          <td>{{name}}</td>
+          <td>{{email}}</td>
+          <td>{{role}}</td>
+          <td class="nowrap">
+            {{^isSelf}}
+            {{#isStudent}}
+            <form class="inline-form" method="post" action="/organiser/users/{{id}}/role">
+              <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+              <input type="hidden" name="role" value="organiser" />
+              <button type="submit" class="btn btn-ghost">Make organiser</button>
+            </form>
+            {{/isStudent}}
+            {{^isStudent}}
+            <form class="inline-form" method="post" action="/organiser/users/{{id}}/role">
+              <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+              <input type="hidden" name="role" value="student" />
+              <button type="submit" class="btn btn-ghost">Make student</button>
+            </form>
+            {{/isStudent}}
+            <form class="inline-form" method="post" action="/organiser/users/{{id}}/delete" onsubmit="return confirm('Remove this user?');">
+              <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+              <button type="submit" class="btn btn-danger">Remove</button>
+            </form>
+            {{/isSelf}}
+            {{#isSelf}}<span class="muted">You</span>{{/isSelf}}
+          </td>
+        </tr>
+        {{/users}}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{{> footer}}

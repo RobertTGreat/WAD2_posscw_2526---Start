@@ -1,6 +1,5 @@
-
 // models/sessionModel.js
-import { sessionsDb } from './_db.js';
+import { sessionsDb } from "./_db.js";
 
 export const SessionModel = {
   async create(session) {
@@ -14,10 +13,20 @@ export const SessionModel = {
   },
   async incrementBookedCount(id, delta = 1) {
     const s = await this.findById(id);
-    if (!s) throw new Error('Session not found');
+    if (!s) throw new Error("Session not found");
     const next = (s.bookedCount ?? 0) + delta;
-    if (next < 0) throw new Error('Booked count cannot be negative');
+    if (next < 0) throw new Error("Booked count cannot be negative");
     await sessionsDb.update({ _id: id }, { $set: { bookedCount: next } });
     return this.findById(id);
-  }
+  },
+  async update(id, patch) {
+    await sessionsDb.update({ _id: id }, { $set: patch });
+    return this.findById(id);
+  },
+  async remove(id) {
+    await sessionsDb.remove({ _id: id });
+  },
+  async removeByCourse(courseId) {
+    await sessionsDb.remove({ courseId }, { multi: true });
+  },
 };

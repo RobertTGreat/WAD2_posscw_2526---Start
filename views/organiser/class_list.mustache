@@ -1,0 +1,30 @@
+{{> head}}
+{{> header}}
+
+<section class="section">
+  <h1 class="page-title">Class roster</h1>
+  <p class="muted">{{course.title}}</p>
+  <p>{{session.startLabel}} – {{session.endLabel}}</p>
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr><th>Name</th><th>Email</th><th>Booking</th></tr>
+      </thead>
+      <tbody>
+        {{#participants}}
+        <tr>
+          <td>{{userName}}</td>
+          <td>{{userEmail}}</td>
+          <td class="muted">{{bookingId}}</td>
+        </tr>
+        {{/participants}}
+        {{^participants}}
+        <tr><td colspan="3" class="muted">No confirmed bookings for this class.</td></tr>
+        {{/participants}}
+      </tbody>
+    </table>
+  </div>
+  <p><a class="btn btn-secondary" href="/organiser/courses/{{course._id}}/edit">Back to course</a></p>
+</section>
+
+{{> footer}}

@@ -1,13 +1,29 @@
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
-  <div class="wrap">
-    🧘 Yoga Studio
-    <nav>
-      <a> hrefs</a>
+  <div class="header-inner wrap">
+    <a class="logo" href="/">Stillpoint</a>
+    <nav class="nav" aria-label="Primary">
+      <a href="/about">About</a>
+      <a href="/courses">Courses</a>
+      {{#isOrganiser}}
+      <a href="/organiser">Organiser</a>
+      {{/isOrganiser}}
     </nav>
-    {{#user}}
-    <div class="user">
-      Signed in as <strong>{{ name }}</strong>
+    <div class="header-actions">
+      {{#isLoggedIn}}
+      <span class="user-chip" aria-live="polite">{{ user.name }}</span>
+      <form class="inline-form" method="post" action="/logout">
+        {{#csrfToken}}
+        <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+        {{/csrfToken}}
+        <button type="submit" class="btn btn-ghost">Sign out</button>
+      </form>
+      {{/isLoggedIn}}
+      {{^isLoggedIn}}
+      <a class="btn btn-ghost" href="/login">Sign in</a>
+      <a class="btn btn-primary" href="/register">Register</a>
+      {{/isLoggedIn}}
     </div>
-    {{/user}}
   </div>
 </header>
+<main id="main" class="wrap main-content">

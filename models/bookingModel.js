@@ -1,6 +1,5 @@
-
 // models/bookingModel.js
-import { bookingsDb } from './_db.js';
+import { bookingsDb } from "./_db.js";
 
 export const BookingModel = {
   async create(booking) {
@@ -12,9 +11,20 @@ export const BookingModel = {
   async listByUser(userId) {
     return bookingsDb.find({ userId }).sort({ createdAt: -1 });
   },
+  async listByCourse(courseId) {
+    return bookingsDb.find({ courseId });
+  },
+  async listBySession(sessionId) {
+    return bookingsDb.find({
+      sessionIds: sessionId,
+      status: "CONFIRMED",
+    });
+  },
   async cancel(id) {
-    await bookingsDb.update({ _id: id }, { $set: { status: 'CANCELLED' } });
+    await bookingsDb.update({ _id: id }, { $set: { status: "CANCELLED" } });
     return this.findById(id);
-  }
+  },
+  async removeByCourse(courseId) {
+    await bookingsDb.remove({ courseId }, { multi: true });
+  },
 };
-``

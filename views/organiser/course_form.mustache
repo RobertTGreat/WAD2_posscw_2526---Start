@@ -1,0 +1,40 @@
+{{> head}}
+{{> header}}
+
+<section class="section narrow">
+  <h1 class="page-title">{{title}}</h1>
+  {{#error}}
+  <p class="alert" role="alert">{{error}}</p>
+  {{/error}}
+  <form class="stack form" method="post" action="{{action}}">
+    <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+    <label>Title <input name="title" required value="{{course.title}}" /></label>
+    <label>Level
+      <select name="level" required>
+        <option value="beginner" {{#sel.beginner}}selected{{/sel.beginner}}>Beginner</option>
+        <option value="intermediate" {{#sel.intermediate}}selected{{/sel.intermediate}}>Intermediate</option>
+        <option value="advanced" {{#sel.advanced}}selected{{/sel.advanced}}>Advanced</option>
+      </select>
+    </label>
+    <label>Format
+      <select name="type" required>
+        <option value="WEEKLY_BLOCK" {{#sel.weekly}}selected{{/sel.weekly}}>Weekly block</option>
+        <option value="WEEKEND_WORKSHOP" {{#sel.weekend}}selected{{/sel.weekend}}>Weekend workshop</option>
+      </select>
+    </label>
+    <label class="checkbox">
+      <input type="checkbox" name="allowDropIn" value="true" {{#course.allowDropIn}}checked{{/course.allowDropIn}} />
+      Allow drop-in bookings for single classes
+    </label>
+    <label>Studio location <input name="location" required value="{{course.location}}" placeholder="Room / address" /></label>
+    <label>Default price per class (£) <input name="defaultPriceGbp" type="text" required value="{{course.defaultPriceGbp}}" inputmode="decimal" /></label>
+    <label>Start date <input name="startDate" type="date" required value="{{course.startDate}}" /></label>
+    <label>End date <input name="endDate" type="date" required value="{{course.endDate}}" /></label>
+    <label>Instructor name <input name="instructorName" value="{{course.instructorName}}" /></label>
+    <label>Description <textarea name="description" rows="5" required>{{course.description}}</textarea></label>
+    <button class="btn btn-primary" type="submit">Save course</button>
+    <a class="btn btn-ghost" href="/organiser">Cancel</a>
+  </form>
+</section>
+
+{{> footer}}

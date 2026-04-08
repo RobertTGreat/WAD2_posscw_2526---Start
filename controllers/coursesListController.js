@@ -1,6 +1,10 @@
 // controllers/coursesListController.js
 import { CourseModel } from "../models/courseModel.js";
 import { SessionModel } from "../models/sessionModel.js";
+import {
+  courseHasUpcomingContent,
+  startOfToday,
+} from "../utils/upcomingCourses.js";
 
 const fmtDateOnly = (iso) =>
   iso
@@ -23,29 +27,30 @@ const fmtDateTime = (iso) =>
       })
     : "TBA";
 
+function fmtMoney(n) {
+  if (n == null || Number.isNaN(Number(n))) return "—";
+  return `£${Number(n).toFixed(2)}`;
+}
+
 export const coursesListPage = async (req, res, next) => {
   try {
-    // Query params for filters/pagination
     const {
-      level, // beginner | intermediate | advanced
-      type, // WEEKLY_BLOCK | WEEKEND_WORKSHOP
-      dropin, // yes | no
-      q, // text search in title/description (basic contains)
-      page = "1", // 1-based
-      pageSize = "10", // default page size
+      level,
+      type,
+      dropin,
+      q,
+      page = "1",
+      pageSize = "10",
     } = req.query;
 
-    // Base filter for DB lookup
     const filter = {};
     if (level) filter.level = level;
     if (type) filter.type = type;
     if (dropin === "yes") filter.allowDropIn = true;
     if (dropin === "no") filter.allowDropIn = false;
 
-    // Fetch all courses matching basic filters
     let courses = await CourseModel.list(filter);
 
-    // Client-side search (NeDB has basic querying; for simplicity, do it here)
     const needle = (q || "").trim().toLowerCase();
     if (needle) {
       courses = courses.filter(
@@ -55,7 +60,13 @@ export const coursesListPage = async (req, res, next) => {
       );
     }
 
-    // Sort by startDate ascending (fallback to title)
+    const upcomingOnly = [];
+    for (const c of courses) {
+      const sessions = await SessionModel.listByCourse(c._id);
+      if (courseHasUpcomingContent(c, sessions)) upcomingOnly.push(c);
+    }
+    courses = upcomingOnly;
+
     courses.sort((a, b) => {
       const ad = a.startDate
         ? new Date(a.startDate).getTime()
@@ -67,7 +78,6 @@ export const coursesListPage = async (req, res, next) => {
       return (a.title || "").localeCompare(b.title || "");
     });
 
-    // Pagination
     const p = Math.max(1, parseInt(page, 10) || 1);
     const ps = Math.max(1, parseInt(pageSize, 10) || 10);
     const total = courses.length;
@@ -75,17 +85,22 @@ export const coursesListPage = async (req, res, next) => {
     const start = (p - 1) * ps;
     const pageItems = courses.slice(start, start + ps);
 
-    // Enrich with first session date, session count
     const cards = await Promise.all(
       pageItems.map(async (c) => {
         const sessions = await SessionModel.listByCourse(c._id);
-        const first = sessions[0];
+        const upcomingSessions = sessions.filter(
+          (s) => new Date(s.startDateTime) >= startOfToday()
+        );
+        const ordered = upcomingSessions.length ? upcomingSessions : sessions;
+        const first = ordered[0];
         return {
           id: c._id,
           title: c.title,
           level: c.level,
           type: c.type,
           allowDropIn: c.allowDropIn,
+          location: c.location || "—",
+          price: fmtMoney(c.defaultPriceGbp),
           startDate: fmtDateOnly(c.startDate),
           endDate: fmtDateOnly(c.endDate),
           nextSession: first ? fmtDateTime(first.startDateTime) : "TBA",
@@ -95,7 +110,6 @@ export const coursesListPage = async (req, res, next) => {
       })
     );
 
-    // Build pagination view model
     const pagination = {
       page: p,
       pageSize: ps,
@@ -107,13 +121,26 @@ export const coursesListPage = async (req, res, next) => {
       nextLink: p < totalPages ? buildLink(req, p + 1, ps) : null,
     };
 
+    const showSignupBanner = req.query.signedup === "1";
+
     res.render("courses", {
       title: "Courses",
+      showSignupBanner,
       filters: {
         level,
         type,
         dropin,
         q,
+        anyLevel: !level,
+        anyType: !type,
+        anyDropin: !dropin,
+        levelBeginner: level === "beginner",
+        levelIntermediate: level === "intermediate",
+        levelAdvanced: level === "advanced",
+        typeWeekly: type === "WEEKLY_BLOCK",
+        typeWeekend: type === "WEEKEND_WORKSHOP",
+        dropinYes: dropin === "yes",
+        dropinNo: dropin === "no",
       },
       courses: cards,
       pagination,
@@ -123,7 +150,6 @@ export const coursesListPage = async (req, res, next) => {
   }
 };
 
-// Helper to preserve current query params while changing page
 function buildLink(req, page, pageSize) {
   const url = new URL(
     `${req.protocol}://${req.get("host")}${req.originalUrl.split("?")[0]}`

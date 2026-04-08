@@ -21,4 +21,17 @@ describe("Health & 404", () => {
     expect(res.headers["content-type"]).toMatch(/text\/plain/);
     expect(res.text).toMatch(/404 Not found/i);
   });
+
+  test("GET /api/courses/:id with bad id returns 404 JSON", async () => {
+    const res = await request(app).get("/api/courses/does-not-exist");
+    expect(res.status).toBe(404);
+    expect(res.headers["content-type"]).toMatch(/json/);
+  });
+
+  test("POST /api/bookings/session without auth returns 401", async () => {
+    const res = await request(app).post("/api/bookings/session").send({
+      sessionId: "invalid-session",
+    });
+    expect(res.status).toBe(401);
+  });
 });

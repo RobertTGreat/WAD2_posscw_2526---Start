@@ -1,0 +1,31 @@
+{{> head}}
+{{> header}}
+
+<section class="section">
+  <h1 class="page-title">Organiser</h1>
+  {{#showSignupBanner}}
+  <p class="alert" role="status">You’re signed in with your new organiser account.</p>
+  {{/showSignupBanner}}
+  <p class="lede muted">Manage courses, classes, and accounts.</p>
+  <nav class="subnav" aria-label="Organiser">
+    <a href="/organiser/courses/new">New course</a>
+    <a href="/organiser/users">Users</a>
+  </nav>
+</section>
+
+<div class="cards">
+  {{#courses}}
+  <article class="card">
+    <h2 class="card-title">{{title}}</h2>
+    <p class="muted small">{{level}} · {{sessionsCount}} sessions</p>
+    <p class="card-actions">
+      <a class="btn btn-secondary" href="/organiser/courses/{{id}}/edit">Edit</a>
+    </p>
+  </article>
+  {{/courses}}
+  {{^courses}}
+  <p class="muted">No courses yet. Create one to get started.</p>
+  {{/courses}}
+</div>
+
+{{> footer}}

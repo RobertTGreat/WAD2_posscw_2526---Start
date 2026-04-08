@@ -1,0 +1,84 @@
+---
+description: WAD2 Yoga Studio coursework — log AI help (correct vs incorrect) and align work with official requirements
+alwaysApply: true
+---
+
+# WAD2 assignment: document AI collaboration
+
+## Mandatory behaviour for every coding session
+
+When you change code, suggest approaches, or answer questions for this project, append (or update) a short log the student can paste into their own notes or README section **“AI collaboration log”**. Use this structure:
+
+| Date | Topic / task | What the AI got **right** (specific) | What the AI got **wrong** or missed (specific) | Student action taken (if any) |
+|------|----------------|--------------------------------------|-----------------------------------------------|--------------------------------|
+
+### AI collaboration log (running — copy rows into your notes / appendix)
+
+| Date | Topic / task | What the AI got **right** | What the AI got **wrong** or missed | Student action taken |
+|------|----------------|---------------------------|-------------------------------------|----------------------|
+| 2026-04-07 | Cursor rule + coursework PDF | Summarised practical/report deliverables, marking themes, AI policy (no AI report/video); gave checklist. | Did not run your app; you must verify behaviour locally. | Use checklist when revising. |
+| 2026-04-07 | Full app: auth, UI, organiser area | NeDB kept; **bcrypt** password hashes; **JWT** in **httpOnly** cookie; **CSRF** on authenticated POSTs; role guards; `/api/*` JSON vs HTML route order; **README**, **seed**, **organiser** CRUD + rosters + user management; fixed broken Mustache; minimalist **CSS**. | Spec wording **“duration”** per course not a dedicated field at first (dates/session count used instead). **Jest + NeDB** file locks on Windows (`EPERM`) until **`--runInBand`**; merged edge tests into health suite. | Run `npm test`, manual click-through; compare to spec for report. |
+| 2026-04-07 | “Do we meet requirements?” | Honest gap analysis: explicit **duration** and submission artefacts (deploy URL, video, report) called out. | N/A for that turn. | You address gaps + submissions outside repo. |
+| 2026-04-07 | How organisers are defined | Accurate: `role === "organiser"` in user docs; seed + **/organiser/users** promote/demote; register was student-only before next change. | N/A | — |
+| 2026-04-07 | Organiser signup + code | **`ORGANISER_SIGNUP_CODE`** in **`.env` / `.env.example`**; **timing-safe** string compare; checkbox + code field; **README** section for markers; redirect organiser → `/organiser`; **`.gitignore`** `.env`. | If `.env` omits the variable, organiser UI hidden — you must copy **`.env.example`**. | Set code in `.env`; test register flow. |
+| 2026-04-08 | Login 401 / “Invalid email or password” | Login flow verified with **supertest** + seeded test user (`POST /login` → 302 + cookie). **README** updated: **`npm test` wipes `db/`** so README demo users disappear until **`npm run seed`**. **`postLogin`** now detects **`passwordHash` missing** and shows a clear message (legacy rows without bcrypt). | Did not initially document that **tests reset NeDB** — user confusion if they ran tests then tried seed logins. | Re-run **`npm run seed`** after tests; use correct email/password pair for the DB state. |
+| 2026-04-08 | Custom sign-up / sign-in flow | **`normalizeEmail()`** for consistent storage + lookup; **`validatePasswordForSignUp`** (8–72 **bytes** for bcrypt); **`UserModel.create`** normalises email; **duplicate** NeDB unique constraint caught; **`loadAuthUser`** uses `String(payload.sub)`; post-register redirect **`?signedup=1`** + banners on courses/organiser; **login** page copy for custom accounts; **`tests/auth.flow.test.js`** registers disposable email then logs in; **README** “Your own account” section. | — | Run **`npm test`**; register a real address locally to confirm. |
+
+*(Add new rows below as you work — ask the AI to update this section or paste new rows yourself.)*
+
+**Rules for the log**
+
+- Be concrete: name files, routes, or behaviours (e.g. “suggested `POST /enrol` before session check” not “helped with backend”).
+- Separate **correct** (worked first time, matched spec, secure) from **incorrect** (wrong API, missing validation, spec mismatch, wasted debugging).
+- If nothing was wrong in a turn, still record what was right so the student has evidence of critical use of AI.
+- Do **not** draft the student’s formal **report** or **video script**; those must be their own work. Logging here supports reflection only.
+
+---
+
+## Official coursework summary (Web Application Development 2, 2025/26)
+
+**Weighting:** Written report **30%** · Practical **70%** · Submission **12:00 noon 8 April** (per specification).
+
+**Module learning outcomes (relevant):** design/develop/test/deploy a data-driven web app; authentication; security awareness; architectures/frameworks; critical evaluation of MVC.
+
+### Practical (70%) — Yoga & Mindfulness Studio booking site
+
+**Stack (baseline):** Node.js, Express, NeDB-promises, Mustache (from supplied prototype: `https://github.com/FionaMacRaeFairlie/WAD2_posscw_2526---Start.git`).
+
+**Required behaviour**
+
+- **Not logged in:** information/overview page (organisation, classes, location); view **current and upcoming** courses with per-class: **name**, **duration**, **date/time**, **description**, **location**, **price**.
+- **Registered users:** **enrol** in a course or **book** a class.
+- **Organisers (logged in):** add courses/classes; **delete** courses/classes; **update** class details; **generate class list** with participant names; **add/delete organisers**; **remove users**.
+
+**Submissions (practical)**
+
+- Code; **README** (how to run; **list of implemented features**).
+- **CodeGrade** on GCULearn: `.zip` or GitHub link.
+- **~15 min video** (Planet eStream): demo, design/development approach, **decision-making with an AI assistant**, features, **security** and how addressed; **do not use AI to generate the video**.
+- **Link to deployed** site.
+
+**AI use (Level 3 collaboration on Perkins et al. scale):** may assist with **code** but student must **evaluate, modify**, and **explain** generated code. **Not** acceptable: AI-generated **report** or **video**; **spelling/grammar check** for the report is allowed.
+
+**Markers’ summary:** full functionality (listings, details, enrolment, organiser CRUD, role-based access); **clean, accessible, responsive** UI; **reliable auth** and secure handling; show **understanding** and **refinement** of AI-assisted code; **deployment** or clear install docs.
+
+### Written report (30%) — ~**2000 words**
+
+Critically evaluate the **supplied** prototype (not only your changes):
+
+- **System design:** compare to **classic MVC**; argue whether approach is **optimal** for this app type.
+- **Completeness:** what the spec requires vs what the supplied code **covers** vs **missing**.
+- **Code quality:** **JavaScript** and **Mustache** templates.
+- **Test coverage** of supplied tests (quantify where possible; gaps and improvements).
+
+---
+
+## Quick checklist against the spec (for implementation work)
+
+- [ ] Public info + course/class details with all listed fields  
+- [ ] Registration users: enrol / book  
+- [ ] Organisers: CRUD for courses/classes, class list, user/organiser management  
+- [ ] Auth + roles enforced  
+- [ ] README + deploy link + video requirements understood  
+
+Use the log table above consistently so the student can cite real examples in the report and video.

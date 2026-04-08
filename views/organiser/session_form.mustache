@@ -1,0 +1,22 @@
+{{> head}}
+{{> header}}
+
+<section class="section narrow">
+  <h1 class="page-title">{{title}}</h1>
+  <p class="muted">Course: {{course.title}}</p>
+  {{#error}}
+  <p class="alert" role="alert">{{error}}</p>
+  {{/error}}
+  <form class="stack form" method="post" action="{{action}}">
+    <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+    <label>Start <input name="startDateTime" type="datetime-local" required value="{{session.startDateTime}}" /></label>
+    <label>End <input name="endDateTime" type="datetime-local" required value="{{session.endDateTime}}" /></label>
+    <label>Capacity <input name="capacity" type="number" min="1" required value="{{session.capacity}}" /></label>
+    <label>Location override (optional) <input name="location" value="{{session.location}}" placeholder="Uses course location if empty" /></label>
+    <label>Price override £ (optional) <input name="priceGbp" value="{{session.priceGbp}}" inputmode="decimal" /></label>
+    <button class="btn btn-primary" type="submit">Save class</button>
+    <a class="btn btn-ghost" href="/organiser/courses/{{course._id}}/edit">Back</a>
+  </form>
+</section>
+
+{{> footer}}

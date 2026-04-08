@@ -1,0 +1,84 @@
+{{> head}}
+{{> header}}
+
+<section class="section narrow">
+  <h1 class="page-title">Create account</h1>
+  <p class="muted small">Use any real email you can access and a password you’ll remember — you’ll use both to sign in later.</p>
+  {{#error}}
+  <p class="alert" role="alert">{{error}}</p>
+  {{/error}}
+  <form class="stack form" method="post" action="/register" id="register-form">
+    <label>
+      Full name
+      <input name="name" type="text" required minlength="2" value="{{form.name}}" autocomplete="name" />
+    </label>
+    <label>
+      Email
+      <input name="email" type="email" required value="{{form.email}}" autocomplete="email" />
+    </label>
+    <label>
+      Password
+      <input name="password" type="password" required minlength="8" autocomplete="new-password" />
+    </label>
+    <label>
+      Confirm password
+      <input name="confirmPassword" type="password" required minlength="8" autocomplete="new-password" />
+    </label>
+
+    {{#organiserSignupConfigured}}
+    <fieldset class="fieldset-organiser">
+      <legend class="legend-inline">Studio organiser</legend>
+      <label class="checkbox">
+        <input type="checkbox" name="signupAsOrganiser" value="yes" id="signupAsOrganiser" {{#form.signupAsOrganiser}}checked{{/form.signupAsOrganiser}} />
+        <span>Are you an organiser? (requires setup code)</span>
+      </label>
+      <div id="organiserCodeWrap" class="organiser-code-wrap" hidden>
+        <label for="organiserCode">
+          Organiser setup code
+          <input
+            type="password"
+            name="organiserCode"
+            id="organiserCode"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            aria-describedby="organiser-code-help"
+          />
+        </label>
+        <p id="organiser-code-help" class="muted small">
+          Enter the code you were given by the studio (for example in a staff email or at onboarding). If you don’t have a code yet, leave this unchecked and register as a participant — an existing organiser can grant you access later.
+        </p>
+      </div>
+    </fieldset>
+    {{/organiserSignupConfigured}}
+    {{^organiserSignupConfigured}}
+    <p class="muted small">
+      Organiser self-signup is disabled (set <code>ORGANISER_SIGNUP_CODE</code> in <code>.env</code> to enable). You can still be promoted by an existing organiser.
+    </p>
+    {{/organiserSignupConfigured}}
+
+    <button class="btn btn-primary" type="submit">Register</button>
+  </form>
+  <p class="muted">Already registered? <a href="/login">Sign in</a></p>
+</section>
+
+{{#organiserSignupConfigured}}
+<script>
+  (function () {
+    var cb = document.getElementById("signupAsOrganiser");
+    var wrap = document.getElementById("organiserCodeWrap");
+    var code = document.getElementById("organiserCode");
+    if (!cb || !wrap || !code) return;
+    function sync() {
+      var on = cb.checked;
+      wrap.hidden = !on;
+      code.required = on;
+      if (!on) code.value = "";
+    }
+    cb.addEventListener("change", sync);
+    sync();
+  })();
+</script>
+{{/organiserSignupConfigured}}
+
+{{> footer}}
