@@ -7,8 +7,11 @@ import { promises as fs } from "fs";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Always resolve relative to this file so seeding and server hit the SAME files
-const dbDir = path.join(__dirname, "../db");
+// Vercel/Lambda: project dir is read-only; only /tmp is writable for NeDB files.
+const dbDir =
+  process.env.VERCEL === "1" || process.env.AWS_LAMBDA_FUNCTION_NAME
+    ? path.join("/tmp", "yoga-nedb")
+    : path.join(__dirname, "../db");
 
 export const usersDb = Datastore.create({
   filename: path.join(dbDir, "users.db"),
