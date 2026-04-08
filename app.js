@@ -14,6 +14,7 @@ import authRoutes from "./routes/auth.js";
 import organiserRoutes from "./routes/organiser.js";
 import { loadAuthUser } from "./middleware/auth.js";
 import { attachFormCsrf } from "./middleware/csrfForm.js";
+import { initDb } from "./models/_db.js";
 
 dotenv.config();
 
@@ -36,6 +37,14 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cookieParser());
+
+let serverlessDbReady;
+if (process.env.VERCEL === "1") {
+  app.use((req, res, next) => {
+    if (!serverlessDbReady) serverlessDbReady = initDb();
+    serverlessDbReady.then(() => next()).catch(next);
+  });
+}
 
 app.use((req, res, next) => {
   res.locals.year = new Date().getFullYear();
